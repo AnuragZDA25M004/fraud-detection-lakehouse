@@ -1,3 +1,6 @@
+# Author: Sreejita Roy (ZDA25M008)
+# BentoML serving layer for fraud detection model
+
 """
 api/service.py
 --------------
