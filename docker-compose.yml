@@ -4,7 +4,7 @@
 #
 # Services: Spark (master + 2 workers) | Kafka (KRaft) |
 #           MinIO (S3) | MLflow | JupyterLab | Airflow |
-#           Grafana | Prometheus | PostgreSQL
+#           Grafana | Prometheus | PostgreSQL | Ollama
 #
 # Usage:
 #   cp .env.example .env
@@ -19,6 +19,7 @@
 #   Airflow:     http://localhost:8090  (admin/admin)
 #   Grafana:     http://localhost:3000  (admin/admin)
 #   Prometheus:  http://localhost:9090
+#   Ollama:      http://localhost:11434
 # ================================================================
 
 version: '3.8'
@@ -172,7 +173,6 @@ services:
       - minio-data:/data
     networks:
       - bigdata-net
-    
 
   # MinIO bucket initialisation (creates 'warehouse' and 'mlflow-artifacts' buckets)
   minio-init:
@@ -333,6 +333,9 @@ services:
     networks:
       - bigdata-net
 
+  # ============================================================
+  # KAFKA UI — Browse topics, messages, consumer groups
+  # ============================================================
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -345,6 +348,23 @@ services:
       - kafka
     networks:
       - bigdata-net
+
+  # ============================================================
+  # OLLAMA — Local LLM for Natural-Language Query Interface
+  # Bonus feature: NL → Spark SQL via Llama 3
+  # After first `docker-compose up -d`, pull the model once:
+  #   docker exec ollama ollama pull llama3
+  # ============================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - bigdata-net
+    restart: unless-stopped
 
 # ============================================================
 # NETWORKS AND VOLUMES
@@ -362,3 +382,4 @@ volumes:
   airflow-logs:
   prometheus-data:
   grafana-data:
+  ollama-data:
